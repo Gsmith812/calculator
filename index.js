@@ -23,52 +23,87 @@ const operate = (operator, first, second) => {
 // Create handler function for numbers buttons
 
 const handleNumbers = e => {
-    if(e.target.innerText === '.' && currOperand.split('').includes('.')){
+    if(e.target.textContent === '.' && currOperand.split('').includes('.')){
         return currOperand;
     }
     if(currOperand === '0') {
-        if(e.target.innerText === '.'){
-            currOperand = currOperand + e.target.innerText;
+        if(e.target.textContent === '.'){
+            currOperand = currOperand + e.target.textContent;
         } else {
-            currOperand = e.target.innerText;
+            currOperand = e.target.textContent;
         }
     } else {
-        currOperand = currOperand + e.target.innerText;
+        currOperand = currOperand + e.target.textContent;
     }
     
-    currDisplay.innerText = currOperand;
+    currDisplay.textContent = currOperand;
 }
 
 // Grab all the operations buttons
 
 const buttons = Array.from(document.querySelectorAll('button'));
-const numbers = buttons.filter(button => parseInt(button.innerText) || parseInt(button.innerText) === 0 || button.innerText === '.');
-const clearBtn = buttons.filter(button => button.innerText === 'Clear');
-const deleteBtn = buttons.filter(button => button.innerText === 'Delete');
+const numbers = buttons.filter(button => parseInt(button.textContent) || parseInt(button.textContent) === 0 || button.textContent === '.');
+const clearBtn = buttons.filter(button => button.textContent === 'Clear');
+const deleteBtn = buttons.filter(button => button.textContent === 'Delete');
 
 // Delete buttons
 
 clearBtn[0].addEventListener('click', e => {
     currOperand = '0';
-    currDisplay.innerText = currOperand;    
+    prevOperand = null;
+    operator = null;
+    currDisplay.textContent = currOperand;
+    operationDisplay.textContent = '';  
 })
 
 deleteBtn[0].addEventListener('click', e => {
     if(currDisplay.textContent.length === 1) {
         currOperand = '0';
-        currDisplay.innerText = currOperand;
+        currDisplay.textContent = currOperand;
     } else {
-        currDisplay.innerText = currDisplay.innerText.slice(0, -1);
-        currOperand = currDisplay.innerText;
+        currDisplay.textContent = currDisplay.textContent.slice(0, -1);
+        currOperand = currDisplay.textContent;
     }
 
+})
+
+// Operator buttons
+
+const operationsBtns = buttons.filter(button => button.id && button.id !== 'equals');
+const equalsBtn = document.querySelector('#equals');
+
+operationsBtns.forEach(button => {
+    button.addEventListener('click', e => {
+        operator = e.target.id;
+        if(!prevOperand) {
+            prevOperand = currOperand;
+            currOperand = '0'
+            currDisplay.textContent = currOperand;
+            operationDisplay.textContent = `${prevOperand} ${e.target.textContent}`
+        } else {
+            prevOperand = operate(operator, parseFloat(prevOperand), parseFloat(currOperand));
+            operationDisplay.textContent = `${prevOperand} ${e.target.textContent}`;
+            currOperand = '0';   
+            currDisplay.textContent = currOperand;        
+        }
+    });
+});
+
+equalsBtn.addEventListener('click', e => {
+    if(prevOperand && currOperand && operator){
+        operationDisplay.textContent += ` ${currOperand} =`;
+        currOperand = operate(operator, parseFloat(prevOperand), parseFloat(currOperand));
+        currDisplay.textContent = currOperand;
+        prevOperand = null;
+    }
 })
 
 // Display
 
 const currDisplay = document.querySelector('.currValue');
+const operationDisplay = document.querySelector('.operation');
 
-currDisplay.innerText = currOperand;
+currDisplay.textContent = currOperand;
 
 numbers.map(number => {
     number.addEventListener('click',handleNumbers)
