@@ -1,0 +1,66 @@
+body {
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+}
+
+.calculator {
+    width: 300px;
+    height: 400px;
+    border: 1px solid black;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 10px;
+}
+
+.display {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    border: 1px solid black;
+    width: 100%;
+    gap: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.operation, .currValue {
+    margin-right: 10px;
+}
+
+.operation {
+    font-size: 20px;
+}
+
+.currValue {
+    font-size: 35px;
+}
+
+.deleteBtns {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 10px;
+}
+
+.delete, .clear {
+    flex: 1 1 50%;
+    height: 50px;
+    font-size: 30px;
+}
+
+.inputBtns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    height: 100%;
+}
+
+.inputBtns>button {
+    flex: 1 1 20%;
+    font-size: 25px;
+}
+
+
+
