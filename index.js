@@ -20,25 +20,68 @@ const operate = (operator, first, second) => {
     }
 }
 
-// Create handler function for numbers buttons
+// Handler Functions for events
 
-const handleNumbers = e => {
-    if(e.target.textContent === '.' && currOperand.split('').includes('.')){
+const handleNumbers = input => {
+
+    if(input === '.' && currOperand.split('').includes('.')){
         return currOperand;
     }
     if(currOperand === '0') {
-        if(e.target.textContent === '.'){
-            currOperand = currOperand + e.target.textContent;
+        if(input === '.'){
+            currOperand = currOperand + input;
         } else {
-            currOperand = e.target.textContent;
+            currOperand = input;
         }
     } else {
-        currOperand = currOperand + e.target.textContent;
+        currOperand = currOperand + input;
     }
     
     currDisplay.textContent = currOperand;
 }
 
+const handleEquals = () => {
+    if(prevOperand && currOperand && operator){
+        operationDisplay.textContent += ` ${currOperand} =`;
+        currOperand = operate(operator, parseFloat(prevOperand), parseFloat(currOperand));
+        currDisplay.textContent = currOperand;
+        prevOperand = null;
+    }
+}
+
+const handleOperators = input => {
+    let selected = buttons.filter(button => button.id === input);
+    operator = selected[0].id;
+    if(!prevOperand) {
+        prevOperand = currOperand;
+        currOperand = '0'
+        currDisplay.textContent = currOperand;
+        operationDisplay.textContent = `${prevOperand} ${selected[0].textContent}`
+    } else {
+        prevOperand = operate(operator, parseFloat(prevOperand), parseFloat(currOperand));
+        operationDisplay.textContent = `${prevOperand} ${selected[0].textContent}`;
+        currOperand = '0';   
+        currDisplay.textContent = currOperand;        
+    }
+}
+
+const handleClear = () => {
+    currOperand = '0';
+    prevOperand = null;
+    operator = null;
+    currDisplay.textContent = currOperand;
+    operationDisplay.textContent = ''; 
+}
+
+const handleDelete = () => {
+    if(currDisplay.textContent.length === 1) {
+        currOperand = '0';
+        currDisplay.textContent = currOperand;
+    } else {
+        currDisplay.textContent = currDisplay.textContent.slice(0, -1);
+        currOperand = currDisplay.textContent;
+    }
+}
 // Grab all the operations buttons
 
 const buttons = Array.from(document.querySelectorAll('button'));
@@ -48,24 +91,9 @@ const deleteBtn = buttons.filter(button => button.textContent === 'Delete');
 
 // Delete buttons
 
-clearBtn[0].addEventListener('click', e => {
-    currOperand = '0';
-    prevOperand = null;
-    operator = null;
-    currDisplay.textContent = currOperand;
-    operationDisplay.textContent = '';  
-})
+clearBtn[0].addEventListener('click', handleClear);
 
-deleteBtn[0].addEventListener('click', e => {
-    if(currDisplay.textContent.length === 1) {
-        currOperand = '0';
-        currDisplay.textContent = currOperand;
-    } else {
-        currDisplay.textContent = currDisplay.textContent.slice(0, -1);
-        currOperand = currDisplay.textContent;
-    }
-
-})
+deleteBtn[0].addEventListener('click', handleDelete);
 
 // Operator buttons
 
@@ -73,30 +101,10 @@ const operationsBtns = buttons.filter(button => button.id && button.id !== 'equa
 const equalsBtn = document.querySelector('#equals');
 
 operationsBtns.forEach(button => {
-    button.addEventListener('click', e => {
-        operator = e.target.id;
-        if(!prevOperand) {
-            prevOperand = currOperand;
-            currOperand = '0'
-            currDisplay.textContent = currOperand;
-            operationDisplay.textContent = `${prevOperand} ${e.target.textContent}`
-        } else {
-            prevOperand = operate(operator, parseFloat(prevOperand), parseFloat(currOperand));
-            operationDisplay.textContent = `${prevOperand} ${e.target.textContent}`;
-            currOperand = '0';   
-            currDisplay.textContent = currOperand;        
-        }
-    });
+    button.addEventListener('click', e => handleOperators(e.target.id));
 });
 
-equalsBtn.addEventListener('click', e => {
-    if(prevOperand && currOperand && operator){
-        operationDisplay.textContent += ` ${currOperand} =`;
-        currOperand = operate(operator, parseFloat(prevOperand), parseFloat(currOperand));
-        currDisplay.textContent = currOperand;
-        prevOperand = null;
-    }
-})
+equalsBtn.addEventListener('click', handleEquals)
 
 // Display
 
@@ -106,5 +114,41 @@ const operationDisplay = document.querySelector('.operation');
 currDisplay.textContent = currOperand;
 
 numbers.map(number => {
-    number.addEventListener('click',handleNumbers)
+    number.addEventListener('click', e => handleNumbers(e.target.textContent));
+});
+
+addEventListener('keydown', e => {
+    if('0' <= e.key && e.key <= '9') {
+        handleNumbers(e.key);
+    }
+    switch(e.key){
+        case '+':
+            handleOperators(e.key);            break;
+        case '-':
+            handleOperators(e.key);            break;
+        case '*':
+            handleOperators(e.key);            break;
+        case '/':
+            e.preventDefault();
+            handleOperators(e.key);
+            break;
+        case '=':
+            handleEquals();
+            break;
+        case '.':
+            handleNumbers(e.key);
+            break;
+        case 'Enter':
+            handleEquals();
+            break;
+        case 'Backspace':
+            handleDelete();
+            break;
+        case 'Delete':
+            handleDelete();
+            break;
+        case 'Escape':
+            handleClear();
+            break;
+    };
 });
